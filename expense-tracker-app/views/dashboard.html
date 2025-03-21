@@ -1,0 +1,239 @@
+<%- include('layout.html', { title: 'Dashboard' }) %>
+
+<%
+// Helper function to determine progress bar color
+function getProgressBarColor(percentage) {
+    if (percentage >= 100) return 'bg-red-500';
+    if (percentage >= 80) return 'bg-yellow-500';
+    return 'bg-green-500';
+}
+
+// Helper function to determine transaction color
+function getTransactionColor(type, prefix = '') {
+    return type === 'income' 
+        ? `${prefix}green` 
+        : `${prefix}red`;
+}
+%>
+
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">
+            Financial Overview - <%= currentMonth %> <%= currentYear %>
+        </h1>
+        <a href="/transactions/new" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+            <i class="fas fa-plus mr-2"></i>
+            Add Transaction
+        </a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Income Card -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-green-100 rounded-full p-3">
+                    <i class="fas fa-arrow-down text-green-500"></i>
+                </div>
+                <div class="ml-4">
+                    <h2 class="text-sm font-medium text-gray-500">Monthly Income</h2>
+                    <p class="text-lg font-semibold text-gray-900"><%= formatCurrency(summary.income) %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expenses Card -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-red-100 rounded-full p-3">
+                    <i class="fas fa-arrow-up text-red-500"></i>
+                </div>
+                <div class="ml-4">
+                    <h2 class="text-sm font-medium text-gray-500">Monthly Expenses</h2>
+                    <p class="text-lg font-semibold text-gray-900"><%= formatCurrency(summary.expense) %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-blue-100 rounded-full p-3">
+                    <i class="fas fa-wallet text-blue-500"></i>
+                </div>
+                <div class="ml-4">
+                    <h2 class="text-sm font-medium text-gray-500">Net Balance</h2>
+                    <p class="text-lg font-semibold text-gray-900"><%= formatCurrency(summary.balance) %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Savings Rate Card -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-purple-100 rounded-full p-3">
+                    <i class="fas fa-piggy-bank text-purple-500"></i>
+                </div>
+                <div class="ml-4">
+                    <h2 class="text-sm font-medium text-gray-500">Savings Rate</h2>
+                    <p class="text-lg font-semibold text-gray-900"><%= summary.savingsRate %>%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Expense Categories Chart -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Expense Breakdown</h3>
+            <canvas id="expenseChart" height="300"></canvas>
+        </div>
+
+        <!-- Monthly Trends Chart -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Monthly Trends</h3>
+            <canvas id="trendChart" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Budget Progress Section -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Budget Progress</h3>
+            <div class="space-y-4">
+                <% budgets.overview.forEach(function(budget) { %>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-gray-700"><%= budget.category %></span>
+                            <span class="text-sm text-gray-500">
+                                <%= formatCurrency(budget.current_spent) %> / <%= formatCurrency(budget.monthly_limit) %>
+                            </span>
+                        </div>
+                        <div class="relative pt-1">
+                            <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                                <div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center <%= getProgressBarColor(budget.percentageSpent) %>"
+                                     style="width: <%= Math.min(budget.percentageSpent, 100) %>%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Recent Transactions</h3>
+                <a href="/transactions" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                    View All <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <% recentTransactions.forEach(function(transaction) { %>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <%= new Date(transaction.date).toLocaleDateString() %>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-<%= getTransactionColor(transaction.type) %>-100 text-<%= getTransactionColor(transaction.type) %>-800">
+                                        <%= transaction.category %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <%= transaction.description || '-' %>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-<%= getTransactionColor(transaction.type) %>-600">
+                                    <%= formatCurrency(transaction.amount) %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Initialize Charts -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Expense Categories Chart
+    const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+    new Chart(expenseCtx, {
+        type: 'doughnut',
+        data: {
+            labels: JSON.parse('<%- JSON.stringify(charts.expensesByCategory.map(item => item.category)) %>'),
+            datasets: [{
+                data: JSON.parse('<%- JSON.stringify(charts.expensesByCategory.map(item => item.amount)) %>'),
+                backgroundColor: [
+                    '#4F46E5', '#7C3AED', '#EC4899', '#EF4444',
+                    '#F59E0B', '#10B981', '#3B82F6', '#6366F1'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    // Monthly Trends Chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'bar',
+        data: {
+            labels: JSON.parse('<%- JSON.stringify(charts.monthlyTrends.map(item => item.month)) %>'),
+            datasets: [{
+                label: 'Income',
+                data: JSON.parse('<%- JSON.stringify(charts.monthlyTrends.map(item => item.income)) %>'),
+                backgroundColor: '#10B981',
+                borderColor: '#059669',
+                borderWidth: 1
+            }, {
+                label: 'Expenses',
+                data: JSON.parse('<%- JSON.stringify(charts.monthlyTrends.map(item => item.expense)) %>'),
+                backgroundColor: '#EF4444',
+                borderColor: '#DC2626',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+});
+</script>
