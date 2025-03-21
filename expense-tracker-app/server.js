@@ -53,6 +53,8 @@ app.use((req, res, next) => {
 
 // Routes
 const authRoutes = require('./routes/auth');
+
+// Auth routes
 app.use('/auth', authRoutes);
 
 // Home route
@@ -62,6 +64,16 @@ app.get('/', (req, res) => {
   } else {
     res.redirect('/auth/login');
   }
+});
+
+// Register route (direct access)
+app.get('/register', (req, res) => {
+  res.redirect('/auth/register');
+});
+
+// Login route (direct access)
+app.get('/login', (req, res) => {
+  res.redirect('/auth/login');
 });
 
 // Dashboard route (protected)
@@ -84,18 +96,20 @@ app.use((req, res) => {
 });
 
 // Start server
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
 // Handle shutdown
 process.on('SIGINT', () => {
-  db.close((err) => {
-    if (err) {
-      console.error('Error closing database:', err);
-    } else {
-      console.log('Database connection closed');
-    }
-    process.exit(0);
+  server.close(() => {
+    db.close((err) => {
+      if (err) {
+        console.error('Error closing database:', err);
+      } else {
+        console.log('Database connection closed');
+      }
+      process.exit(0);
+    });
   });
 });
