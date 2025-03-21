@@ -1,0 +1,92 @@
+/* TEAM */
+    Developer: [Your Name]
+    Contact: dev@example.com
+    GitHub: @username
+    From: [Your Location]
+
+/* THANKS */
+    Node.js - https://nodejs.org
+    Express.js - https://expressjs.com
+    Tailwind CSS - https://tailwindcss.com
+    Chart.js - https://www.chartjs.org
+    Font Awesome - https://fontawesome.com
+    Google Fonts - https://fonts.google.com
+
+/* SITE */
+    Last update: 2024/01/01
+    Language: English
+    Doctype: HTML5
+    IDE: Visual Studio Code
+    Standards: HTML5, CSS3, ES6+
+    Components: Node.js, Express.js, SQLite, EJS
+    Software: Git, npm
+
+/* TECHNOLOGY */
+    Frontend:
+        - HTML5
+        - CSS3 (Tailwind CSS)
+        - JavaScript (ES6+)
+        - Chart.js for data visualization
+        - Service Workers for offline functionality
+        - Progressive Web App (PWA)
+
+    Backend:
+        - Node.js
+        - Express.js
+        - SQLite database
+        - EJS templating
+        - RESTful API
+
+    Tools & Infrastructure:
+        - Git for version control
+        - npm for package management
+        - VS Code for development
+        - ESLint for code quality
+        - Jest for testing
+
+/* FEATURES */
+    - Responsive design
+    - Progressive Web App (PWA)
+    - Offline functionality
+    - Real-time data updates
+    - Data visualization
+    - Export/Import functionality
+    - Multi-device sync
+    - Dark mode support
+    - Accessibility compliant
+
+/* SECURITY */
+    - HTTPS enforced
+    - CSRF protection
+    - XSS prevention
+    - SQL injection protection
+    - Input validation
+    - Rate limiting
+    - Security headers
+    - Regular security updates
+
+/* PERFORMANCE */
+    - Minified assets
+    - Gzip compression
+    - Browser caching
+    - Lazy loading
+    - Code splitting
+    - Resource optimization
+    - CDN delivery
+
+/* ACCESSIBILITY */
+    - WCAG 2.1 compliant
+    - Semantic HTML
+    - ARIA labels
+    - Keyboard navigation
+    - Screen reader support
+    - Color contrast compliance
+    - Focus management
+
+/* OPEN SOURCE LICENSES */
+    This project uses several open-source libraries and tools.
+    Full license information can be found in the project repository.
+
+/* CONTRIBUTE */
+    Want to contribute? Visit our GitHub repository:
+    https://github.com/username/expense-tracker
