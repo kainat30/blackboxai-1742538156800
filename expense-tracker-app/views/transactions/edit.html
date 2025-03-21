@@ -1,0 +1,219 @@
+<%- include('../layout.html', { title: 'Edit Transaction' }) %>
+
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow rounded-lg">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h1 class="text-xl font-semibold text-gray-900">Edit Transaction</h1>
+                <a href="/transactions" class="text-indigo-600 hover:text-indigo-900">
+                    <i class="fas fa-arrow-left mr-1"></i>
+                    Back to Transactions
+                </a>
+            </div>
+        </div>
+
+        <!-- Error Messages -->
+        <% if (locals.errors && errors.length > 0) { %>
+        <div class="px-6 py-4 bg-red-50">
+            <div class="rounded-md p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">
+                            There were errors with your submission
+                        </h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <ul class="list-disc pl-5 space-y-1">
+                                <% errors.forEach(function(error) { %>
+                                    <li><%= error.msg %></li>
+                                <% }); %>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Transaction Form -->
+        <form id="editForm" class="p-6 space-y-6">
+            <input type="hidden" name="_method" value="PUT">
+            
+            <!-- Transaction Type -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-4">Transaction Type</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="relative flex items-center justify-center p-4 border rounded-lg cursor-pointer hover:border-indigo-500 transition-colors">
+                        <input type="radio" name="type" value="income" class="sr-only" required
+                               <%= transaction.type === 'income' ? 'checked' : '' %>>
+                        <div class="flex items-center">
+                            <i class="fas fa-arrow-down text-green-500 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-900">Income</span>
+                        </div>
+                        <div class="absolute -inset-px rounded-lg border-2 border-transparent peer-checked:border-indigo-500 pointer-events-none" aria-hidden="true"></div>
+                    </label>
+                    <label class="relative flex items-center justify-center p-4 border rounded-lg cursor-pointer hover:border-indigo-500 transition-colors">
+                        <input type="radio" name="type" value="expense" class="sr-only" required
+                               <%= transaction.type === 'expense' ? 'checked' : '' %>>
+                        <div class="flex items-center">
+                            <i class="fas fa-arrow-up text-red-500 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-900">Expense</span>
+                        </div>
+                        <div class="absolute -inset-px rounded-lg border-2 border-transparent peer-checked:border-indigo-500 pointer-events-none" aria-hidden="true"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div>
+                <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                <select id="category" name="category" required
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                    <option value="">Select a category</option>
+                    <optgroup label="Income Categories" id="income-categories" 
+                             <%= transaction.type === 'expense' ? 'disabled' : '' %>>
+                        <% categories.income.forEach(function(category) { %>
+                            <option value="<%= category %>" 
+                                    <%= transaction.category === category ? 'selected' : '' %>>
+                                <%= category %>
+                            </option>
+                        <% }); %>
+                    </optgroup>
+                    <optgroup label="Expense Categories" id="expense-categories"
+                             <%= transaction.type === 'income' ? 'disabled' : '' %>>
+                        <% categories.expense.forEach(function(category) { %>
+                            <option value="<%= category %>"
+                                    <%= transaction.category === category ? 'selected' : '' %>>
+                                <%= category %>
+                            </option>
+                        <% }); %>
+                    </optgroup>
+                </select>
+            </div>
+
+            <!-- Amount -->
+            <div>
+                <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span class="text-gray-500">$</span>
+                    </div>
+                    <input type="number" name="amount" id="amount" required
+                           class="block w-full pl-7 pr-12 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
+                           placeholder="0.00" step="0.01" min="0.01"
+                           value="<%= transaction.amount %>">
+                </div>
+            </div>
+
+            <!-- Date -->
+            <div>
+                <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+                <input type="date" name="date" id="date" required
+                       class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
+                       value="<%= new Date(transaction.date).toISOString().split('T')[0] %>">
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea name="description" id="description" rows="3"
+                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                          placeholder="Add a description (optional)"><%= transaction.description %></textarea>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="deleteTransaction()"
+                        class="inline-flex items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    <i class="fas fa-trash-alt mr-2"></i>
+                    Delete
+                </button>
+                <a href="/transactions" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <i class="fas fa-save mr-2"></i>
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeInputs = document.querySelectorAll('input[name="type"]');
+    const incomeCategories = document.getElementById('income-categories');
+    const expenseCategories = document.getElementById('expense-categories');
+    const categorySelect = document.getElementById('category');
+    const editForm = document.getElementById('editForm');
+
+    // Handle transaction type change
+    typeInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.value === 'income') {
+                incomeCategories.disabled = false;
+                expenseCategories.disabled = true;
+                categorySelect.value = '';
+            } else {
+                incomeCategories.disabled = true;
+                expenseCategories.disabled = false;
+                categorySelect.value = '';
+            }
+        });
+    });
+
+    // Handle form submission
+    editForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(editForm);
+        
+        fetch('/transactions/<%= transaction.id %>', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(Object.fromEntries(formData))
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/transactions';
+            } else {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Error updating transaction');
+                });
+            }
+        })
+        .catch(error => {
+            alert(error.message);
+        });
+    });
+});
+
+// Delete transaction
+function deleteTransaction() {
+    if (confirm('Are you sure you want to delete this transaction?')) {
+        fetch('/transactions/<%= transaction.id %>', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/transactions';
+            } else {
+                throw new Error('Error deleting transaction');
+            }
+        })
+        .catch(error => {
+            alert(error.message);
+        });
+    }
+}
+</script>
