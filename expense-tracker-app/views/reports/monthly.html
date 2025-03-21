@@ -1,0 +1,206 @@
+<!-- Monthly Report Content -->
+<div class="space-y-6">
+    <!-- Report Header -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            Financial Summary for <%= period.month %> <%= period.year %>
+        </h2>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Total Income -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-100 rounded-full p-3">
+                        <i class="fas fa-arrow-down text-green-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Total Income</h3>
+                        <p class="text-lg font-semibold text-gray-900"><%= formatCurrency(summary.totals.income) %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Expenses -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-red-100 rounded-full p-3">
+                        <i class="fas fa-arrow-up text-red-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Total Expenses</h3>
+                        <p class="text-lg font-semibold text-gray-900"><%= formatCurrency(summary.totals.expense) %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Net Savings -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-100 rounded-full p-3">
+                        <i class="fas fa-piggy-bank text-blue-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Net Savings</h3>
+                        <p class="text-lg font-semibold text-gray-900"><%= formatCurrency(summary.totals.savings) %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Savings Rate -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-100 rounded-full p-3">
+                        <i class="fas fa-percentage text-purple-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Savings Rate</h3>
+                        <p class="text-lg font-semibold text-gray-900"><%= summary.totals.savingsRate %>%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Income Categories -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Income Breakdown</h3>
+            <div class="space-y-4">
+                <% summary.byCategory.filter(item => item.type === 'income').forEach(function(item) { %>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-gray-700"><%= item.category %></span>
+                            <span class="text-sm text-gray-900"><%= formatCurrency(item.total) %></span>
+                        </div>
+                        <div class="relative pt-1">
+                            <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                                <div class="bg-green-500 rounded"
+                                     style="width: <%= (item.total / summary.totals.income * 100) %>%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+
+        <!-- Expense Categories -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Expense Breakdown</h3>
+            <div class="space-y-4">
+                <% summary.byCategory.filter(item => item.type === 'expense').forEach(function(item) { %>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-gray-700"><%= item.category %></span>
+                            <span class="text-sm text-gray-900"><%= formatCurrency(item.total) %></span>
+                        </div>
+                        <div class="relative pt-1">
+                            <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                                <div class="bg-red-500 rounded"
+                                     style="width: <%= (item.total / summary.totals.expense * 100) %>%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Status -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Budget Status</h3>
+        <div class="space-y-4">
+            <% budgets.forEach(function(budget) { %>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm font-medium text-gray-700"><%= budget.category %></span>
+                        <div class="text-sm text-gray-500">
+                            <%= formatCurrency(budget.spent) %> / <%= formatCurrency(budget.monthly_limit) %>
+                            <span class="ml-2 <%= budget.remaining >= 0 ? 'text-green-600' : 'text-red-600' %>">
+                                (<%= budget.remaining >= 0 ? '+' : '-' %><%= formatCurrency(Math.abs(budget.remaining)) %>)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="relative pt-1">
+                        <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                            <div class="<%= budget.remaining >= 0 ? 'bg-green-500' : 'bg-red-500' %> rounded"
+                                 style="width: <%= Math.min((budget.spent / budget.monthly_limit * 100), 100) %>%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Income Distribution Chart -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Income Distribution</h3>
+            <canvas id="incomeChart" height="300"></canvas>
+        </div>
+
+        <!-- Expense Distribution Chart -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Expense Distribution</h3>
+            <canvas id="expenseChart" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Prepare data for charts
+    const incomeData = <%- JSON.stringify(summary.byCategory.filter(item => item.type === 'income')) %>;
+    const expenseData = <%- JSON.stringify(summary.byCategory.filter(item => item.type === 'expense')) %>;
+
+    // Income Chart
+    new Chart(document.getElementById('incomeChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: incomeData.map(item => item.category),
+            datasets: [{
+                data: incomeData.map(item => item.total),
+                backgroundColor: [
+                    '#10B981', '#059669', '#047857', '#065F46', '#064E3B'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    // Expense Chart
+    new Chart(document.getElementById('expenseChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: expenseData.map(item => item.category),
+            datasets: [{
+                data: expenseData.map(item => item.total),
+                backgroundColor: [
+                    '#EF4444', '#DC2626', '#B91C1C', '#991B1B', '#7F1D1D',
+                    '#F59E0B', '#D97706', '#B45309', '#92400E', '#78350F'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+});
+</script>
