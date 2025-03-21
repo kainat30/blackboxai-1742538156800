@@ -1,0 +1,101 @@
+# Dependabot configuration file
+version: 2
+
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "team-leads"
+    assignees:
+      - "maintainers"
+    labels:
+      - "dependencies"
+      - "security"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    target-branch: "develop"
+    versioning-strategy: "auto"
+    ignore:
+      - dependency-name: "express"
+        versions: ["5.x"]
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "devops-team"
+    labels:
+      - "docker"
+      - "dependencies"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "devops-team"
+    labels:
+      - "ci-cd"
+      - "dependencies"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+# Global settings
+updates-security:
+  - package-ecosystem: "*"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    labels:
+      - "security"
+    milestone: "Security Updates"
+    assignees:
+      - "security-team"
+    commit-message:
+      prefix: "security"
+      include: "scope"
+
+# Pull request settings
+pull-request-branch-name:
+  separator: "-"
+
+# Version updates settings
+version-updates:
+  - package-ecosystem: "*"
+    directory: "/"
+    allow:
+      - dependency-type: "direct"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+# Security updates settings
+security-updates:
+  - package-ecosystem: "*"
+    directory: "/"
+    allow:
+      - dependency-type: "all"
