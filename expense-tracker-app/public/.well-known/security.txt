@@ -1,0 +1,32 @@
+# Security Policy for Expense Tracker
+# Last updated: 2024-01-01
+
+# Contact Information
+Contact: mailto:security@example.com
+Contact: https://example.com/security/report
+Encryption: https://example.com/pgp-key.txt
+
+# Security Policy
+Policy: https://example.com/security-policy
+
+# Preferred Languages
+Preferred-Languages: en
+
+# Canonical URL
+Canonical: https://example.com/.well-known/security.txt
+
+# Reporting Format
+# Please include:
+# - Description of the vulnerability
+# - Steps to reproduce
+# - Impact assessment
+# - Proof of concept if available
+
+# Acknowledgments
+Acknowledgments: https://example.com/security/hall-of-fame
+
+# Hiring
+Hiring: https://example.com/careers/security
+
+# Expiration
+Expires: 2025-01-01T00:00:00.000Z
