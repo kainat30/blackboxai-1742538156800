@@ -1,0 +1,112 @@
+# CodeQL Configuration
+
+name: "Expense Tracker CodeQL Config"
+
+disable-default-queries: false
+
+queries:
+  - name: Security and Quality
+    uses: security-and-quality
+  - name: Security Extended
+    uses: security-extended
+
+paths:
+  - src
+  - routes
+  - models
+  - public/js
+exclude:
+  - node_modules
+  - dist
+  - build
+  - '**/*.test.js'
+  - '**/*.spec.js'
+  - '**/vendor/**'
+
+query-filters:
+  - exclude:
+      problem.severity:
+        - warning
+        - recommendation
+  - exclude:
+      tags: 
+        - external/cwe/cwe-398
+        - external/cwe/cwe-710
+
+paths-ignore:
+  - '**/node_modules/**'
+  - '**/test/**'
+  - '**/*.test.js'
+  - '**/*.spec.js'
+  - '**/dist/**'
+  - '**/build/**'
+  - '**/coverage/**'
+  - '**/.github/**'
+  - '**/.vscode/**'
+  - '**/docs/**'
+
+database:
+  analyze:
+    language: javascript
+    index:
+      include:
+        - "**/*.js"
+        - "**/*.jsx"
+        - "**/*.ts"
+        - "**/*.tsx"
+      exclude:
+        - "**/*.min.js"
+        - "**/node_modules/**"
+        - "**/vendor/**"
+    extraction:
+      javascript:
+        index:
+          filters:
+            - exclude: "**/test/**"
+            - exclude: "**/*.test.js"
+            - exclude: "**/*.spec.js"
+        parse:
+          features: all
+
+output:
+  formats:
+    - sarif-latest
+  summary:
+    include-query-help: true
+  diagnostics:
+    export: all
+    level: warning
+
+trap:
+  javascript:
+    extractor:
+      index:
+        include:
+          - "**/*.js"
+          - "**/*.jsx"
+          - "**/*.ts"
+          - "**/*.tsx"
+        exclude:
+          - "**/*.min.js"
+          - "**/node_modules/**"
+          - "**/vendor/**"
+
+security:
+  default-severity: high
+  ignore-patterns:
+    - pattern: "**/test/**"
+      reason: "Test files are not deployed to production"
+    - pattern: "**/*.test.js"
+      reason: "Test files are not deployed to production"
+    - pattern: "**/node_modules/**"
+      reason: "Dependencies are managed separately"
+
+reporting:
+  issue-confidence-threshold: high
+  max-issues-per-file: 10
+  max-paths-per-issue: 5
+  sarif:
+    add-file-level-issues: true
+    add-rule-level-issues: true
+    group-rules-by-pack: true
+    include-query-help: true
