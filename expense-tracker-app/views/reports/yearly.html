@@ -1,0 +1,193 @@
+<!-- Yearly Report Content -->
+<div class="space-y-6">
+    <!-- Report Header -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">
+            Financial Summary for <%= year %>
+        </h2>
+
+        <!-- Annual Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Total Income -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-100 rounded-full p-3">
+                        <i class="fas fa-arrow-down text-green-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Annual Income</h3>
+                        <p class="text-lg font-semibold text-gray-900"><%= formatCurrency(totals.income) %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Expenses -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-red-100 rounded-full p-3">
+                        <i class="fas fa-arrow-up text-red-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Annual Expenses</h3>
+                        <p class="text-lg font-semibold text-gray-900"><%= formatCurrency(totals.expense) %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Net Savings -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-100 rounded-full p-3">
+                        <i class="fas fa-piggy-bank text-blue-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Annual Savings</h3>
+                        <p class="text-lg font-semibold text-gray-900"><%= formatCurrency(totals.savings) %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Savings Rate -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-100 rounded-full p-3">
+                        <i class="fas fa-percentage text-purple-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-gray-500">Avg. Savings Rate</h3>
+                        <p class="text-lg font-semibold text-gray-900"><%= totals.savingsRate %>%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trends Chart -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Monthly Trends</h3>
+        <canvas id="monthlyTrendsChart" height="300"></canvas>
+    </div>
+
+    <!-- Monthly Breakdown Table -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Monthly Breakdown</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Income</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Expenses</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Savings</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <% monthlyData.forEach(function(month) { %>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <%= month.month %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600">
+                                <%= formatCurrency(month.income) %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-red-600">
+                                <%= formatCurrency(month.expense) %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right <%= month.savings >= 0 ? 'text-green-600' : 'text-red-600' %>">
+                                <%= formatCurrency(month.savings) %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right <%= parseFloat(month.savingsRate) >= 0 ? 'text-green-600' : 'text-red-600' %>">
+                                <%= month.savingsRate %>%
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+                <tfoot class="bg-gray-50">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Total</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600 font-medium">
+                            <%= formatCurrency(totals.income) %>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-red-600 font-medium">
+                            <%= formatCurrency(totals.expense) %>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right <%= totals.savings >= 0 ? 'text-green-600' : 'text-red-600' %> font-medium">
+                            <%= formatCurrency(totals.savings) %>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right <%= parseFloat(totals.savingsRate) >= 0 ? 'text-green-600' : 'text-red-600' %> font-medium">
+                            <%= totals.savingsRate %>%
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Monthly Trends Chart
+    const monthlyData = <%- JSON.stringify(monthlyData) %>;
+    
+    new Chart(document.getElementById('monthlyTrendsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: monthlyData.map(item => item.month),
+            datasets: [
+                {
+                    label: 'Income',
+                    data: monthlyData.map(item => item.income),
+                    backgroundColor: '#10B981',
+                    borderColor: '#059669',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Expenses',
+                    data: monthlyData.map(item => item.expense),
+                    backgroundColor: '#EF4444',
+                    borderColor: '#DC2626',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Savings',
+                    data: monthlyData.map(item => item.savings),
+                    type: 'line',
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#3B82F6',
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': $' + context.raw.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
