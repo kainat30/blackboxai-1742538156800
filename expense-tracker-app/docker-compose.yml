@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # Web Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: expense-tracker-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=sqlite:/usr/src/app/data/database.sqlite
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+  # Redis for Caching
+  redis:
+    image: redis:alpine
+    container_name: expense-tracker-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - app-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: expense-tracker-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./public:/usr/share/nginx/html
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+  # Development Tools
+  adminer:
+    image: adminer
+    container_name: expense-tracker-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+  # Mail Server for Development
+  mailhog:
+    image: mailhog/mailhog
+    container_name: expense-tracker-mailhog
+    ports:
+      - "1025:1025"  # SMTP Server
+      - "8025:8025"  # Web Interface
+    networks:
+      - app-network
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
+
+# Development Tools Configuration
+x-development:
+  app:
+    environment:
+      - DEBUG=expense-tracker:*
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - .:/usr/src/app:delegated
+      - /usr/src/app/node_modules
+    command: npm run dev
+
+# Production Configuration
+x-production:
+  app:
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    command: npm start
+
+# Test Configuration
+x-test:
+  app:
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=sqlite:/usr/src/app/data/test.sqlite
+    command: npm test
