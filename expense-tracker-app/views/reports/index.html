@@ -1,0 +1,197 @@
+<%- include('../layout.html', { title: 'Financial Reports' }) %>
+
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">Financial Reports</h1>
+        <div class="flex space-x-3">
+            <button onclick="exportData()"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <i class="fas fa-download mr-2"></i>
+                Export Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Report Types -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="p-6">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8">
+                    <button onclick="switchReport('monthly')"
+                            class="tab-button border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Monthly Report
+                    </button>
+                    <button onclick="switchReport('yearly')"
+                            class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Yearly Report
+                    </button>
+                    <button onclick="switchReport('custom')"
+                            class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Custom Report
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Report Filters -->
+            <div class="mt-6 space-y-6">
+                <!-- Monthly Report Filters -->
+                <div id="monthlyFilters" class="report-filters">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="monthSelect" class="block text-sm font-medium text-gray-700">Select Month</label>
+                            <input type="month" id="monthSelect" name="month"
+                                   class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
+                                   value="<%= new Date().toISOString().slice(0, 7) %>">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="generateMonthlyReport()"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yearly Report Filters -->
+                <div id="yearlyFilters" class="report-filters hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="yearSelect" class="block text-sm font-medium text-gray-700">Select Year</label>
+                            <select id="yearSelect" name="year"
+                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                                <% for(let year = new Date().getFullYear(); year >= 2020; year--) { %>
+                                    <option value="<%= year %>"><%= year %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="generateYearlyReport()"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Report Filters -->
+                <div id="customFilters" class="report-filters hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="startDate" class="block text-sm font-medium text-gray-700">Start Date</label>
+                            <input type="date" id="startDate" name="startDate"
+                                   class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                        </div>
+                        <div>
+                            <label for="endDate" class="block text-sm font-medium text-gray-700">End Date</label>
+                            <input type="date" id="endDate" name="endDate"
+                                   class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="generateCustomReport()"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Content -->
+    <div id="reportContent" class="space-y-6">
+        <!-- Report content will be dynamically inserted here -->
+    </div>
+</div>
+
+<script>
+let currentReport = 'monthly';
+
+function switchReport(type) {
+    currentReport = type;
+    
+    // Update tab styles
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('border-indigo-500', 'text-indigo-600');
+        button.classList.add('border-transparent', 'text-gray-500');
+    });
+    event.target.classList.remove('border-transparent', 'text-gray-500');
+    event.target.classList.add('border-indigo-500', 'text-indigo-600');
+
+    // Show/hide filters
+    document.querySelectorAll('.report-filters').forEach(filter => {
+        filter.classList.add('hidden');
+    });
+    document.getElementById(`${type}Filters`).classList.remove('hidden');
+
+    // Clear report content
+    document.getElementById('reportContent').innerHTML = '';
+}
+
+function generateMonthlyReport() {
+    const month = document.getElementById('monthSelect').value;
+    fetchReport(`/reports/monthly?date=${month}`);
+}
+
+function generateYearlyReport() {
+    const year = document.getElementById('yearSelect').value;
+    fetchReport(`/reports/yearly?year=${year}`);
+}
+
+function generateCustomReport() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    if (!startDate || !endDate) {
+        alert('Please select both start and end dates');
+        return;
+    }
+    
+    if (new Date(startDate) > new Date(endDate)) {
+        alert('Start date must be before end date');
+        return;
+    }
+
+    fetchReport(`/reports/custom?startDate=${startDate}&endDate=${endDate}`);
+}
+
+function fetchReport(url) {
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('reportContent').innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error generating report');
+        });
+}
+
+function exportData() {
+    let url = '/reports/export';
+    
+    switch (currentReport) {
+        case 'monthly':
+            url += `?date=${document.getElementById('monthSelect').value}`;
+            break;
+        case 'yearly':
+            url += `?year=${document.getElementById('yearSelect').value}`;
+            break;
+        case 'custom':
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            if (startDate && endDate) {
+                url += `?startDate=${startDate}&endDate=${endDate}`;
+            }
+            break;
+    }
+
+    window.location.href = url;
+}
+
+// Initialize with monthly report
+document.addEventListener('DOMContentLoaded', function() {
+    generateMonthlyReport();
+});
+</script>
